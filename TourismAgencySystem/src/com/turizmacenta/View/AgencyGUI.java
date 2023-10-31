@@ -2,13 +2,16 @@ package com.turizmacenta.View;
 
 import com.turizmacenta.Helper.Config;
 import com.turizmacenta.Helper.Helper;
-import com.turizmacenta.Model.Admin;
 import com.turizmacenta.Model.Agency;
 import com.turizmacenta.Model.Hotel;
 
 import javax.swing.*;
 import javax.swing.event.TableModelEvent;
 import javax.swing.table.DefaultTableModel;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 import java.util.ArrayList;
 
 public class AgencyGUI extends JFrame{
@@ -23,7 +26,7 @@ public class AgencyGUI extends JFrame{
     private JTextField fld_hotel_email;
     private JTextField fld_hotel_telephone;
     private JComboBox cmb_hotel_star;
-    private JButton btn_hotel_add;
+    private JButton btn_feature_hostel;
     private JPanel pnl_hotel_list;
     private JScrollPane scrl_hotel_list;
     private JPanel pnl_add_delete;
@@ -92,28 +95,6 @@ public class AgencyGUI extends JFrame{
             }
         });
 
-        btn_hotel_add.addActionListener(e -> {
-            String hotelItem = cmb_hotel_star.getSelectedItem().toString();
-            if(Helper.isFieldEmpty(fld_hotel_email) || Helper.isFieldEmpty(fld_hotel_city) || Helper.isFieldEmpty(fld_hotel_region) ||
-                    Helper.isFieldEmpty(fld_hotel_address) || Helper.isFieldEmpty(fld_hotel_email) || Helper.isFieldEmpty(fld_hotel_telephone)) {
-                Helper.showMsg("fill");
-            } else {
-                if (Hotel.add(fld_hotel_name.getText(), fld_hotel_city.getText(), fld_hotel_region.getText(), fld_hotel_address.getText(),
-                        fld_hotel_email.getText(), fld_hotel_telephone.getText(), hotelItem)) {
-                    Helper.showMsg("done");
-                    loadHotelModel();
-                    fld_hotel_name.setText(null);
-                    fld_hotel_city.setText(null);
-                    fld_hotel_region.setText(null);
-                    fld_hotel_address.setText(null);
-                    fld_hotel_email.setText(null);
-                    fld_hotel_telephone.setText(null);
-                } else {
-                    Helper.showMsg("error");
-                }
-            }
-        });
-
         btn_hotel_delete.addActionListener(e -> {
             if(Helper.isFieldEmpty(fld_hotel_id)) {
                 Helper.showMsg("fill");
@@ -150,14 +131,47 @@ public class AgencyGUI extends JFrame{
                 String hotel_email = tbl_hotel_list.getValueAt(tbl_hotel_list.getSelectedRow(), 5).toString();
                 String hotel_telephone = tbl_hotel_list.getValueAt(tbl_hotel_list.getSelectedRow(), 6).toString();
                 String hotel_star = tbl_hotel_list.getValueAt(tbl_hotel_list.getSelectedRow(), 7).toString();
+                String hotel_feature = tbl_hotel_list.getValueAt(tbl_hotel_list.getSelectedRow(), 8).toString();
+                String hotel_hostel = tbl_hotel_list.getValueAt(tbl_hotel_list.getSelectedRow(), 9).toString();
 
-                if(Hotel.update(hotel_id, hotel_name, hotel_city, hotel_region, hotel_address, hotel_email, hotel_telephone, hotel_star)) {
+                if(Hotel.update(hotel_id, hotel_name, hotel_city, hotel_region, hotel_address, hotel_email, hotel_telephone, hotel_star, hotel_feature, hotel_hostel)) {
                     Helper.showMsg("done");
                 }
                 loadHotelModel();
             }
         });
+
+        btn_feature_hostel.addActionListener(e -> {
+            String hotelItem = cmb_hotel_star.getSelectedItem().toString();
+            if(Helper.isFieldEmpty(fld_hotel_email) || Helper.isFieldEmpty(fld_hotel_city) || Helper.isFieldEmpty(fld_hotel_region) ||
+                    Helper.isFieldEmpty(fld_hotel_address) || Helper.isFieldEmpty(fld_hotel_email) || Helper.isFieldEmpty(fld_hotel_telephone)) {
+                Helper.showMsg("fill");
+            } else {
+                if (Hotel.add(fld_hotel_name.getText(), fld_hotel_city.getText(), fld_hotel_region.getText(), fld_hotel_address.getText(),
+                        fld_hotel_email.getText(), fld_hotel_telephone.getText(), hotelItem)) {
+                    fld_hotel_name.setText(null);
+                    fld_hotel_city.setText(null);
+                    fld_hotel_region.setText(null);
+                    fld_hotel_address.setText(null);
+                    fld_hotel_email.setText(null);
+                    fld_hotel_telephone.setText(null);
+                    int select_last_id = Hotel.getList().get(Hotel.getList().size()-1).getId();
+                    AddFeatureAndHostelGUI featureAndHostelGUI = new AddFeatureAndHostelGUI(Hotel.getFetch(select_last_id));
+                    featureAndHostelGUI.addWindowListener(new WindowAdapter() {
+                        @Override
+                        public void windowClosed(WindowEvent e) {
+                            loadHotelModel();
+                            Helper.showMsg("done");
+                        }
+                    });
+                } else {
+                    Helper.showMsg("error");
+                }
+            }
+        });
+
         // ## Hotel List and Operations
+
     }
 
     private void loadHotelModel() {
@@ -170,10 +184,12 @@ public class AgencyGUI extends JFrame{
             row_hotel_list[i++] = obj.getName();
             row_hotel_list[i++] = obj.getCity();
             row_hotel_list[i++] = obj.getRegion();
-            row_hotel_list[i++] = obj.getAdress();
+            row_hotel_list[i++] = obj.getAddress();
             row_hotel_list[i++] = obj.getEmail();
             row_hotel_list[i++] = obj.getTelephone();
             row_hotel_list[i++] = obj.getStar();
+            row_hotel_list[i++] = obj.getFeature();
+            row_hotel_list[i++] = obj.getHostel();
             mdl_hotel_list.addRow(row_hotel_list);
         }
     }
@@ -188,10 +204,12 @@ public class AgencyGUI extends JFrame{
             row_hotel_list[i++] = obj.getName();
             row_hotel_list[i++] = obj.getCity();
             row_hotel_list[i++] = obj.getRegion();
-            row_hotel_list[i++] = obj.getAdress();
+            row_hotel_list[i++] = obj.getAddress();
             row_hotel_list[i++] = obj.getEmail();
             row_hotel_list[i++] = obj.getTelephone();
             row_hotel_list[i++] = obj.getStar();
+            row_hotel_list[i++] = obj.getFeature();
+            row_hotel_list[i++] = obj.getHostel();
             mdl_hotel_list.addRow(row_hotel_list);
         }
     }

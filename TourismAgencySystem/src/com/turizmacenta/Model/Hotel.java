@@ -2,7 +2,9 @@ package com.turizmacenta.Model;
 
 import com.turizmacenta.Helper.DBConnector;
 import com.turizmacenta.Helper.Helper;
+import com.turizmacenta.View.AddFeatureAndHostelGUI;
 
+import javax.swing.*;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -14,20 +16,24 @@ public class Hotel {
     private String name;
     private String city;
     private String region;
-    private String adress;
+    private String address;
     private String email;
     private String telephone;
     private String star;
+    private String feature;
+    private String hostel;
 
-    public Hotel(int id, String name, String city, String region, String adress, String email, String telephone, String star) {
+    public Hotel(int id, String name, String city, String region, String address, String email, String telephone, String star, String feature, String hostel) {
         this.id = id;
         this.name = name;
         this.city = city;
         this.region = region;
-        this.adress = adress;
+        this.address = address;
         this.email = email;
         this.telephone = telephone;
         this.star = star;
+        this.feature = feature;
+        this.hostel = hostel;
     }
 
     public int getId() {
@@ -62,12 +68,12 @@ public class Hotel {
         this.region = region;
     }
 
-    public String getAdress() {
-        return adress;
+    public String getAddress() {
+        return address;
     }
 
-    public void setAdress(String adress) {
-        this.adress = adress;
+    public void setAddress(String adress) {
+        this.address = adress;
     }
 
     public String getEmail() {
@@ -94,6 +100,22 @@ public class Hotel {
         this.star = star;
     }
 
+    public String getFeature() {
+        return feature;
+    }
+
+    public void setFeature(String feature) {
+        this.feature = feature;
+    }
+
+    public String getHostel() {
+        return hostel;
+    }
+
+    public void setHostel(String hostel) {
+        this.hostel = hostel;
+    }
+
     public static ArrayList<String> typeList() {
         ArrayList<String> typeList = new ArrayList<>();
         typeList.add("1");
@@ -112,7 +134,7 @@ public class Hotel {
             Statement st = DBConnector.getInstance().createStatement();
             ResultSet rs = st.executeQuery(query);
             while (rs.next()) {
-                obj = new Hotel(rs.getInt("id"), rs.getString("name"), rs.getString("city"), rs.getString("region"), rs.getString("address"), rs.getString("email"), rs.getString("telephone"), rs.getString("star"));
+                obj = new Hotel(rs.getInt("id"), rs.getString("name"), rs.getString("city"), rs.getString("region"), rs.getString("address"), rs.getString("email"), rs.getString("telephone"), rs.getString("star"), rs.getString("feature"), rs.getString("hostel"));
                 hotelList.add(obj);
             }
         } catch (SQLException e) {
@@ -171,7 +193,8 @@ public class Hotel {
             while (rs.next()) {
                 obj = new Hotel(rs.getInt("id"), rs.getString("name"), rs.getString("city"),
                         rs.getString("region"), rs.getString("address"), rs.getString("email"),
-                        rs.getString("telephone"), rs.getString("star"));
+                        rs.getString("telephone"), rs.getString("star"), rs.getString("feature"),
+                        rs.getString("hostel"));
                 hotelList.add(obj);
             }
         } catch (SQLException e) {
@@ -180,8 +203,8 @@ public class Hotel {
         return hotelList;
     }
 
-    public static boolean update(int hotel_id, String hotel_name, String hotel_city, String hotel_region, String hotel_address, String hotel_email, String hotel_telephone, String hotel_star) {
-        String query = "UPDATE hotel SET name=?, city=?, region=?, address=?, email=?, telephone=?, star=? WHERE id=?";
+    public static boolean update(int hotel_id, String hotel_name, String hotel_city, String hotel_region, String hotel_address, String hotel_email, String hotel_telephone, String hotel_star, String hotel_feature, String hotel_hostel) {
+        String query = "UPDATE hotel SET name=?, city=?, region=?, address=?, email=?, telephone=?, star=?, feature=?, hostel=? WHERE id=?";
         if (!Hotel.typeList().contains(hotel_star)) {
             Helper.showMsg("Lütfen geçerli bir yıldız seçiniz:\n1\n2\n3\n4\n5");
             return false;
@@ -195,10 +218,45 @@ public class Hotel {
             pr.setString(5,hotel_email);
             pr.setString(6,hotel_telephone);
             pr.setString(7,hotel_star);
-            pr.setInt(8,hotel_id);
+            pr.setString(8,hotel_feature);
+            pr.setString(9,hotel_hostel);
+            pr.setInt(10,hotel_id);
             return pr.executeUpdate() != -1;
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    public static boolean update(String feature, String hostel, int id) {
+        String query = "UPDATE hotel SET feature=?, hostel=? WHERE id=?";
+        try {
+            PreparedStatement pr = DBConnector.getInstance().prepareStatement(query);
+            pr.setString(1,feature);
+            pr.setString(2, hostel);
+            pr.setInt(3,id);
+            return pr.executeUpdate() != -1;
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public static Hotel getFetch(int id) {
+        Hotel obj = null;
+        String query = "SELECT * FROM hotel WHERE id = ?";
+        try {
+            PreparedStatement pr = DBConnector.getInstance().prepareStatement(query);
+            pr.setInt(1,id);
+            ResultSet rs = pr.executeQuery();
+            if (rs.next()) {
+                obj = new Hotel(rs.getInt("id"), rs.getString("name"),
+                        rs.getString("city"), rs.getString("region"),
+                        rs.getString("address"), rs.getString("email"),
+                        rs.getString("telephone"), rs.getString("star"),
+                        rs.getString("feature"), rs.getString("hostel"));
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+        return obj;
     }
 }

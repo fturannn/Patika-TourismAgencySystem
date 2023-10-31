@@ -1,0 +1,87 @@
+package com.turizmacenta.View;
+
+import com.turizmacenta.Helper.Config;
+import com.turizmacenta.Helper.DBConnector;
+import com.turizmacenta.Helper.Helper;
+import com.turizmacenta.Model.Hotel;
+
+import javax.swing.*;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
+import java.util.ArrayList;
+
+public class AddFeatureAndHostelGUI extends JFrame {
+
+    private Hotel hotel;
+    private JPanel wrapper;
+    private JCheckBox chk_add_free_park;
+    private JCheckBox chk_add_ultra;
+    private JCheckBox chk_add_pool;
+    private JCheckBox chk_add_allin;
+    private JCheckBox chk_add_free_wifi;
+    private JCheckBox chk_add_room_breakfast;
+    private JCheckBox chk_add_fitness;
+    private JCheckBox chk_add_concierge;
+    private JCheckBox chk_add_spa;
+    private JCheckBox chk_add_724;
+    private JCheckBox chk_add_all_hostel;
+    private JCheckBox chk_add_half_hostel;
+    private JCheckBox chk_add_just_bed;
+    private JCheckBox chk_add_full_credit;
+    private JButton btn_add_facility;
+    private JPanel pnl_top;
+
+    public AddFeatureAndHostelGUI(Hotel hotel) {
+        this.hotel = hotel;
+        add(wrapper);
+        setSize(600, 300);
+        setLocation(Helper.screenCenterPoint("x", getSize()), Helper.screenCenterPoint("y", getSize()));
+        setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+        setTitle(Config.PROJECT_TITLE);
+        setVisible(true);
+
+        btn_add_facility.addActionListener(e -> {
+            ArrayList<JCheckBox> feature = new ArrayList<>();
+            ArrayList<JCheckBox> hostel = new ArrayList<>();
+            feature.add(chk_add_free_park);
+            hostel.add(chk_add_ultra);
+            feature.add(chk_add_pool);
+            hostel.add(chk_add_allin);
+            feature.add(chk_add_free_wifi);
+            hostel.add(chk_add_room_breakfast);
+            feature.add(chk_add_fitness);
+            feature.add(chk_add_concierge);
+            feature.add(chk_add_spa);
+            feature.add(chk_add_724);
+            hostel.add(chk_add_all_hostel);
+            hostel.add(chk_add_half_hostel);
+            hostel.add(chk_add_just_bed);
+            hostel.add(chk_add_full_credit);
+            String hostels = "";
+            String features = "";
+            int count = 0;
+
+            for (JCheckBox i : feature) {
+                if (i.isSelected() && count < 6) {
+                    features = features + i.getText() + ", ";
+                } else if (i.isSelected() && count == 6) {
+                    features = features + i.getText();
+                    count = 0;
+                    break;
+                }
+                count++;
+            }
+
+            for (int i = 0 ; i < hostel.size(); i++) {
+                if (hostel.get(i).isSelected() && i == hostel.size() - 1) {
+                    hostels += hostel.get(i).getText();
+                } else if (hostel.get(i).isSelected() && i < hostel.size() - 1) {
+                    hostels += hostel.get(i).getText() + ", ";
+                }
+            }
+
+            Hotel.update(features, hostels, hotel.getId());
+            dispose();
+        });
+    }
+}
