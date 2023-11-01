@@ -4,6 +4,7 @@ import com.turizmacenta.Helper.Config;
 import com.turizmacenta.Helper.Helper;
 import com.turizmacenta.Model.Agency;
 import com.turizmacenta.Model.Hotel;
+import com.turizmacenta.Model.Period;
 
 import javax.swing.*;
 import javax.swing.event.TableModelEvent;
@@ -47,8 +48,23 @@ public class AgencyGUI extends JFrame{
     private JTextField fld_period_id;
     private JButton btn_delete_period;
     private JPanel pnl_period_add_delete;
+    private JPanel pnl_room_list;
+    private JTable table1;
+    private JComboBox cmb_room_hotel_name;
+    private JTextField fld_room_stock;
+    private JComboBox cmb_room_bed_number;
+    private JComboBox cmb_room_tv;
+    private JComboBox cmb_room_minibar;
+    private JComboBox cmb_room_game_console;
+    private JTextField fld_room_name;
+    private JButton btn_add_room;
+    private JTextField fld_room_id;
+    private JButton btn_delete_room;
+    private JPanel pnl_room_add_delete;
     private DefaultTableModel mdl_hotel_list;
     private Object [] row_hotel_list;
+    private DefaultTableModel mdl_period_list;
+    private Object [] row_period_list;
 
     private final Agency agency;
 
@@ -179,6 +195,81 @@ public class AgencyGUI extends JFrame{
         });
         // ## Hotel List and Operations
 
+        // Period List and Operations
+        mdl_period_list = new DefaultTableModel();
+        mdl_hotel_list = new DefaultTableModel() {
+            @Override
+            public boolean isCellEditable(int row, int column) { // ID satırının düzenlenebilir olmasını engelleme
+                if (column == 0) {
+                    return false;
+                }
+                return super.isCellEditable(row, column);
+            }
+        };
+
+        Object[] col_period_list = {"ID", "Dönem Başlangıcı", "Dönem Bitişi"};
+        mdl_period_list.setColumnIdentifiers(col_period_list);
+
+        row_period_list = new Object[col_period_list.length];
+        loadPeriodModel();
+
+        tbl_period_list.setModel(mdl_period_list);
+        tbl_period_list.getTableHeader().setReorderingAllowed(false); // Tablo başlıklarının düzenlenmesini engeller
+        tbl_period_list.getColumnModel().getColumn(0).setMaxWidth(45);
+
+        tbl_period_list.getSelectionModel().addListSelectionListener(e -> {
+            try {
+                String select_period_id = tbl_period_list.getValueAt(tbl_period_list.getSelectedRow(), 0).toString();
+                fld_period_id.setText(select_period_id);
+            } catch (Exception ignored){
+            }
+        });
+
+        btn_delete_period.addActionListener(e -> {
+            if(Helper.isFieldEmpty(fld_period_id)) {
+                Helper.showMsg("fill");
+            } else {
+                if (Helper.confirm("sure")) {
+                    int period_id = Integer.parseInt(fld_period_id.getText());
+                    if(Period.delete(period_id)) {
+                        Helper.showMsg("done");
+                        loadPeriodModel();
+                        fld_period_id.setText(null);
+                    } else {
+                        Helper.showMsg("error");
+                    }
+                }
+            }
+        });
+
+        btn_add_period.addActionListener(e -> {
+            if(Helper.isFieldEmpty(fld_period_start) || Helper.isFieldEmpty(fld_period_end)) {
+                Helper.showMsg("fill");
+            } else {
+                String period_start = fld_period_start.getText();
+                String period_end = fld_period_end.getText();
+                if (Period.add(period_start, period_end)) {
+                    Helper.showMsg("done");
+                    loadPeriodModel();
+                    fld_period_start.setText(null);
+                    fld_period_end.setText(null);
+                }
+            }
+        });
+        // ## Period List and Operations
+    }
+
+    private void loadPeriodModel() {
+        DefaultTableModel clearModel = (DefaultTableModel) tbl_period_list.getModel();
+        clearModel.setRowCount(0);
+        int i;
+        for (Period obj : Period.getList()) {
+            i = 0;
+            row_period_list[i++] = obj.getId();
+            row_period_list[i++] = obj.getPeriod_start();
+            row_period_list[i++] = obj.getPeriod_end();
+            mdl_period_list.addRow(row_period_list);
+        }
     }
 
     private void loadHotelModel() {
