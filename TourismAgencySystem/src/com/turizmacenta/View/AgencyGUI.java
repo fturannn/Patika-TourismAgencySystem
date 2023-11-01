@@ -8,8 +8,6 @@ import com.turizmacenta.Model.Hotel;
 import javax.swing.*;
 import javax.swing.event.TableModelEvent;
 import javax.swing.table.DefaultTableModel;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.util.ArrayList;
@@ -40,6 +38,15 @@ public class AgencyGUI extends JFrame{
     private JButton btn_sh_hotel;
     private JPanel pnl_hotel_sh;
     private JPanel pnl_top;
+    private JTable tbl_period_list;
+    private JPanel pnl_period_list;
+    private JScrollPane scrl_period_list;
+    private JTextField fld_period_start;
+    private JTextField fld_period_end;
+    private JButton btn_add_period;
+    private JTextField fld_period_id;
+    private JButton btn_delete_period;
+    private JPanel pnl_period_add_delete;
     private DefaultTableModel mdl_hotel_list;
     private Object [] row_hotel_list;
 
@@ -84,7 +91,8 @@ public class AgencyGUI extends JFrame{
 
         tbl_hotel_list.setModel(mdl_hotel_list);
         tbl_hotel_list.getTableHeader().setReorderingAllowed(false); // Tablo başlıklarının düzenlenmesini engeller
-        tbl_hotel_list.getColumnModel().getColumn(0).setMaxWidth(75);
+        tbl_hotel_list.getColumnModel().getColumn(0).setMaxWidth(45);
+        tbl_hotel_list.getColumnModel().getColumn(7).setMaxWidth(45);
 
         // Seçtiğimiz satırdaki id'yi fld_user_id kutucuğuna getirir.
         tbl_hotel_list.getSelectionModel().addListSelectionListener(e -> {
@@ -169,7 +177,6 @@ public class AgencyGUI extends JFrame{
                 }
             }
         });
-
         // ## Hotel List and Operations
 
     }

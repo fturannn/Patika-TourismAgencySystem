@@ -44,19 +44,19 @@ public class AddFeatureAndHostelGUI extends JFrame {
             ArrayList<JCheckBox> feature = new ArrayList<>();
             ArrayList<JCheckBox> hostel = new ArrayList<>();
             feature.add(chk_add_free_park);
-            hostel.add(chk_add_ultra);
             feature.add(chk_add_pool);
-            hostel.add(chk_add_allin);
-            feature.add(chk_add_free_wifi);
-            hostel.add(chk_add_room_breakfast);
             feature.add(chk_add_fitness);
             feature.add(chk_add_concierge);
             feature.add(chk_add_spa);
             feature.add(chk_add_724);
+            feature.add(chk_add_free_wifi);
+            hostel.add(chk_add_allin);
+            hostel.add(chk_add_room_breakfast);
             hostel.add(chk_add_all_hostel);
             hostel.add(chk_add_half_hostel);
             hostel.add(chk_add_just_bed);
             hostel.add(chk_add_full_credit);
+            hostel.add(chk_add_ultra);
             String hostels = "";
             String features = "";
             int count = 0;
@@ -64,8 +64,10 @@ public class AddFeatureAndHostelGUI extends JFrame {
             for (JCheckBox i : feature) {
                 if (i.isSelected() && count < 6) {
                     features = features + i.getText() + ", ";
+                    hotel.addFeature(hotel.getId(), i.getText());
                 } else if (i.isSelected() && count == 6) {
                     features = features + i.getText();
+                    hotel.addFeature(hotel.getId(), i.getText());
                     count = 0;
                     break;
                 }
@@ -75,8 +77,10 @@ public class AddFeatureAndHostelGUI extends JFrame {
             for (int i = 0 ; i < hostel.size(); i++) {
                 if (hostel.get(i).isSelected() && i == hostel.size() - 1) {
                     hostels += hostel.get(i).getText();
+                    hotel.addHostel(hotel.getId(), hostel.get(i).getText());
                 } else if (hostel.get(i).isSelected() && i < hostel.size() - 1) {
                     hostels += hostel.get(i).getText() + ", ";
+                    hotel.addHostel(hotel.getId(), hostel.get(i).getText());
                 }
             }
 

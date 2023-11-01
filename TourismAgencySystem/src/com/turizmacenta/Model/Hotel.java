@@ -259,4 +259,28 @@ public class Hotel {
         }
         return obj;
     }
+
+    public static boolean addFeature(int hotel_id, String feature) {
+        String query = "INSERT INTO feature (hotel_id, feature) VALUES (?,?)";
+        try {
+            PreparedStatement pr = DBConnector.getInstance().prepareStatement(query);
+            pr.setInt(1, hotel_id);
+            pr.setString(2, feature);
+            return pr.executeUpdate() != -1;
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public static boolean addHostel(int hotel_id, String hostel) {
+        String query = "INSERT INTO hostel (hotel_id, hostel) VALUES (?,?)";
+        try {
+            PreparedStatement pr = DBConnector.getInstance().prepareStatement(query);
+            pr.setInt(1, hotel_id);
+            pr.setString(2, hostel);
+            return pr.executeUpdate() != -1;
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+    }
 }
