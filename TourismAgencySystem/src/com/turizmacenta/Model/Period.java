@@ -10,13 +10,19 @@ import java.util.ArrayList;
 
 public class Period {
     private int id;
+    private int hotel_id;
+    private Hotel hotel;
     private String period_start;
     private String period_end;
+    private String period;
 
-    public Period(int id, String period_start, String period_end) {
+    public Period(int id, int hotel_id, String period_start, String period_end) {
         this.id = id;
+        this.hotel_id = hotel_id;
         this.period_start = period_start;
         this.period_end = period_end;
+        this.hotel = Hotel.getFetch(hotel_id);
+        this.period = period_start + "-" + period_end;
     }
 
     public int getId() {
@@ -43,6 +49,30 @@ public class Period {
         this.period_end = period_end;
     }
 
+    public int getHotel_id() {
+        return hotel_id;
+    }
+
+    public void setHotel_id(int hotel_id) {
+        this.hotel_id = hotel_id;
+    }
+
+    public Hotel getHotel() {
+        return hotel;
+    }
+
+    public void setHotel(Hotel hotel) {
+        this.hotel = hotel;
+    }
+
+    public String getPeriod() {
+        return period;
+    }
+
+    public void setPeriod(String period) {
+        this.period = period;
+    }
+
     public static ArrayList<Period> getList() {
         ArrayList<Period> periodList = new ArrayList<>();
         String query = "SELECT * FROM period";
@@ -51,7 +81,7 @@ public class Period {
             Statement st = DBConnector.getInstance().createStatement();
             ResultSet rs = st.executeQuery(query);
             while (rs.next()) {
-                obj = new Period(rs.getInt("id"), rs.getString("period_start"), rs.getString("period_end"));
+                obj = new Period(rs.getInt("id"), rs.getInt("hotel_id"), rs.getString("period_start"), rs.getString("period_end"));
                 periodList.add(obj);
             }
         } catch (SQLException e) {
@@ -71,15 +101,32 @@ public class Period {
         }
     }
 
-    public static boolean add(String period_start, String period_end) {
-        String query = "INSERT INTO period (period_start, period_end) VALUES (?,?)";
+    public static boolean add(int hotel_id, String period_start, String period_end) {
+        String query = "INSERT INTO period (hotel_id, period_start, period_end) VALUES (?,?,?)";
         try {
             PreparedStatement pr = DBConnector.getInstance().prepareStatement(query);
-            pr.setString(1, period_start);
-            pr.setString(2, period_end);
+            pr.setInt(1, hotel_id);
+            pr.setString(2, period_start);
+            pr.setString(3, period_end);
             return pr.executeUpdate() != -1;
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    public static Period getFetch(int id) {
+        Period obj = null;
+        String query = "SELECT * FROM period WHERE id = ?";
+        try {
+            PreparedStatement pr = DBConnector.getInstance().prepareStatement(query);
+            pr.setInt(1,id);
+            ResultSet rs = pr.executeQuery();
+            if (rs.next()) {
+                obj = new Period(rs.getInt("id"), rs.getInt("hotel_id"), rs.getString("period_start"), rs.getString("period_end"));
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+        return obj;
     }
 }

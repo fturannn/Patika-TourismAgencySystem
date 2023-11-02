@@ -2,9 +2,6 @@ package com.turizmacenta.Model;
 
 import com.turizmacenta.Helper.DBConnector;
 import com.turizmacenta.Helper.Helper;
-import com.turizmacenta.View.AddFeatureAndHostelGUI;
-
-import javax.swing.*;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -22,6 +19,8 @@ public class Hotel {
     private String star;
     private String feature;
     private String hostel;
+
+    public Hotel () {}
 
     public Hotel(int id, String name, String city, String region, String address, String email, String telephone, String star, String feature, String hostel) {
         this.id = id;
@@ -134,7 +133,17 @@ public class Hotel {
             Statement st = DBConnector.getInstance().createStatement();
             ResultSet rs = st.executeQuery(query);
             while (rs.next()) {
-                obj = new Hotel(rs.getInt("id"), rs.getString("name"), rs.getString("city"), rs.getString("region"), rs.getString("address"), rs.getString("email"), rs.getString("telephone"), rs.getString("star"), rs.getString("feature"), rs.getString("hostel"));
+                obj = new Hotel();
+                obj.setId(rs.getInt("id"));
+                obj.setName(rs.getString("name"));
+                obj.setCity(rs.getString("city"));
+                obj.setRegion(rs.getString("region"));
+                obj.setAddress(rs.getString("address"));
+                obj.setEmail(rs.getString("email"));
+                obj.setTelephone(rs.getString("telephone"));
+                obj.setStar(rs.getString("star"));
+                obj.setFeature(rs.getString("feature"));
+                obj.setHostel(rs.getString("hostel"));
                 hotelList.add(obj);
             }
         } catch (SQLException e) {
@@ -266,18 +275,6 @@ public class Hotel {
             PreparedStatement pr = DBConnector.getInstance().prepareStatement(query);
             pr.setInt(1, hotel_id);
             pr.setString(2, feature);
-            return pr.executeUpdate() != -1;
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    public static boolean addHostel(int hotel_id, String hostel) {
-        String query = "INSERT INTO hostel (hotel_id, hostel) VALUES (?,?)";
-        try {
-            PreparedStatement pr = DBConnector.getInstance().prepareStatement(query);
-            pr.setInt(1, hotel_id);
-            pr.setString(2, hostel);
             return pr.executeUpdate() != -1;
         } catch (SQLException e) {
             throw new RuntimeException(e);

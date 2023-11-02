@@ -3,6 +3,7 @@ package com.turizmacenta.View;
 import com.turizmacenta.Helper.Config;
 import com.turizmacenta.Helper.DBConnector;
 import com.turizmacenta.Helper.Helper;
+import com.turizmacenta.Model.Hostel;
 import com.turizmacenta.Model.Hotel;
 
 import javax.swing.*;
@@ -59,28 +60,18 @@ public class AddFeatureAndHostelGUI extends JFrame {
             hostel.add(chk_add_ultra);
             String hostels = "";
             String features = "";
-            int count = 0;
 
             for (JCheckBox i : feature) {
-                if (i.isSelected() && count < 6) {
-                    features = features + i.getText() + ", ";
+                if (i.isSelected()) {
+                    features = features + i.getText() + " ";
                     hotel.addFeature(hotel.getId(), i.getText());
-                } else if (i.isSelected() && count == 6) {
-                    features = features + i.getText();
-                    hotel.addFeature(hotel.getId(), i.getText());
-                    count = 0;
-                    break;
                 }
-                count++;
             }
 
-            for (int i = 0 ; i < hostel.size(); i++) {
-                if (hostel.get(i).isSelected() && i == hostel.size() - 1) {
-                    hostels += hostel.get(i).getText();
-                    hotel.addHostel(hotel.getId(), hostel.get(i).getText());
-                } else if (hostel.get(i).isSelected() && i < hostel.size() - 1) {
-                    hostels += hostel.get(i).getText() + ", ";
-                    hotel.addHostel(hotel.getId(), hostel.get(i).getText());
+            for (JCheckBox i : hostel) {
+                if (i.isSelected()) {
+                    hostels = hostels + i.getText() + " ";
+                    Hostel.add(hotel.getId(), i.getText());
                 }
             }
 
