@@ -8,11 +8,18 @@ import com.turizmacenta.Model.*;
 import javax.swing.*;
 import javax.swing.event.TableModelEvent;
 import javax.swing.table.DefaultTableModel;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.awt.event.WindowAdapter;
-import java.awt.event.WindowEvent;
+import java.awt.*;
+import java.awt.event.*;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.time.Duration;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.time.temporal.Temporal;
 import java.util.ArrayList;
+import java.util.Date;
+import java.util.concurrent.TimeUnit;
 
 public class AgencyGUI extends JFrame{
     private JTabbedPane pnl_agency;
@@ -74,6 +81,28 @@ public class AgencyGUI extends JFrame{
     private JScrollPane scrl_price_list;
     private JPanel pnl_price_add_delete;
     private JComboBox cmb_price_hotel_name;
+    private JTextField fld_price_amount;
+    private JTextField fld_price_id;
+    private JButton btn_price_delete;
+    private JTable tbl_search_room;
+    private JPanel pnl_search_room;
+    private JScrollPane scrl_search_room;
+    private JPanel pnl_search;
+    private JComboBox cmb_search_city;
+    private JTextField fld_search_check_in;
+    private JTextField fld_search_check_out;
+    private JComboBox cmb_search_adult;
+    private JComboBox cmb_search_child;
+    private JButton btn_search_hotel;
+    private JComboBox cmb_hotel_city;
+    private JTextField fld_res_name;
+    private JTextField fld_res_tc;
+    private JTextField fld_res_telephone;
+    private JTextField fld_res_email;
+    private JTextField fld_res_selected_id;
+    private JButton btn_reservation;
+    private JComboBox cmb_res_hostel_type;
+    private JTextField fld_res_night;
     private DefaultTableModel mdl_hotel_list;
     private Object [] row_hotel_list;
     private DefaultTableModel mdl_period_list;
@@ -82,6 +111,8 @@ public class AgencyGUI extends JFrame{
     private Object [] row_room_list;
     private DefaultTableModel mdl_price_list;
     private Object [] row_price_list;
+    private DefaultTableModel mdl_room_search;
+    private Object [] row_room_search;
 
     private final Agency agency;
 
@@ -90,7 +121,7 @@ public class AgencyGUI extends JFrame{
         add(wrapper);
 
         add(wrapper);
-        setSize(1250,650);
+        setSize(1400,650);
         int x = Helper.screenCenterPoint("x",getSize());
         int y = Helper.screenCenterPoint("y",getSize());
         setLocation(x, y);
@@ -142,9 +173,16 @@ public class AgencyGUI extends JFrame{
             } else {
                 if (Helper.confirm("sure")) {
                     int hotel_id = Integer.parseInt(fld_hotel_id.getText());
-                    if(Hotel.delete(hotel_id)) {
+                    if(Hotel.delete(hotel_id) && Hostel.delete(hotel_id) && Hotel.deleteFeature(hotel_id) &&
+                            Period.deleteHotel(hotel_id) && Room.deleteHotel(hotel_id) && Price.deleteHotel(hotel_id)) {
                         Helper.showMsg("done");
                         loadHotelModel();
+                        loadPeriodModel();
+                        loadPeriodHotelCombo();
+                        loadHotelCombo();
+                        loadPriceModel();
+                        loadPriceHotelCombo();
+                        loadRoomModel();
                         fld_hotel_id.setText(null);
                     } else {
                         Helper.showMsg("error");
@@ -179,19 +217,25 @@ public class AgencyGUI extends JFrame{
                     Helper.showMsg("done");
                 }
                 loadHotelModel();
+                loadPeriodModel();
+                loadPeriodHotelCombo();
+                loadHotelCombo();
+                loadPriceModel();
+                loadPriceHotelCombo();
+                loadRoomModel();
             }
         });
 
         btn_feature_hostel.addActionListener(e -> {
-            String hotelItem = cmb_hotel_star.getSelectedItem().toString();
-            if(Helper.isFieldEmpty(fld_hotel_email) || Helper.isFieldEmpty(fld_hotel_city) || Helper.isFieldEmpty(fld_hotel_region) ||
+            String hotelStar = cmb_hotel_star.getSelectedItem().toString();
+            String hotelName = cmb_hotel_city.getSelectedItem().toString();
+            if(Helper.isFieldEmpty(fld_hotel_email) || Helper.isFieldEmpty(fld_hotel_region) ||
                     Helper.isFieldEmpty(fld_hotel_address) || Helper.isFieldEmpty(fld_hotel_email) || Helper.isFieldEmpty(fld_hotel_telephone)) {
                 Helper.showMsg("fill");
             } else {
-                if (Hotel.add(fld_hotel_name.getText(), fld_hotel_city.getText(), fld_hotel_region.getText(), fld_hotel_address.getText(),
-                        fld_hotel_email.getText(), fld_hotel_telephone.getText(), hotelItem)) {
+                if (Hotel.add(fld_hotel_name.getText(), hotelName, fld_hotel_region.getText(), fld_hotel_address.getText(),
+                        fld_hotel_email.getText(), fld_hotel_telephone.getText(), hotelStar)) {
                     fld_hotel_name.setText(null);
-                    fld_hotel_city.setText(null);
                     fld_hotel_region.setText(null);
                     fld_hotel_address.setText(null);
                     fld_hotel_email.setText(null);
@@ -203,10 +247,12 @@ public class AgencyGUI extends JFrame{
                         @Override
                         public void windowClosed(WindowEvent e) {
                             loadHotelModel();
+                            loadPeriodHotelCombo();
+                            loadHotelCombo();
+                            loadPriceHotelCombo();
                             Helper.showMsg("done");
                         }
                     });
-
                 } else {
                     Helper.showMsg("error");
                 }
@@ -271,13 +317,49 @@ public class AgencyGUI extends JFrame{
             } else {
                 String period_start = fld_period_start.getText();
                 String period_end = fld_period_end.getText();
-                if (Period.add(hotelItem.getKey() ,period_start, period_end)) {
+                String period = period_start + "-" + period_end;
+                if (Period.add(hotelItem.getKey() ,period_start, period_end, period)) {
                     Helper.showMsg("done");
                     loadPeriodModel();
-                    loadPricePeriodCombo();
                     fld_period_start.setText(null);
                     fld_period_end.setText(null);
                 }
+            }
+        });
+
+        fld_period_start.setForeground(Color.GRAY);
+        fld_period_start.addFocusListener(new FocusListener() {
+            @Override
+            public void focusGained(FocusEvent e) {
+                if (fld_period_start.getText().trim().equals("gg/aa/yyyy")) {
+                    fld_period_start.setText("");
+                }
+                fld_period_start.setForeground(Color.BLACK);
+            }
+            @Override
+            public void focusLost(FocusEvent e) {
+                if (fld_period_start.getText().trim().isEmpty()) {
+                    fld_period_start.setText("gg/aa/yyyy");
+                }
+                fld_period_start.setForeground(Color.GRAY);
+            }
+        });
+
+        fld_period_end.setForeground(Color.GRAY);
+        fld_period_end.addFocusListener(new FocusListener() {
+            @Override
+            public void focusGained(FocusEvent e) {
+                if (fld_period_end.getText().trim().equals("gg/aa/yyyy")) {
+                    fld_period_end.setText("");
+                }
+                fld_period_end.setForeground(Color.BLACK);
+            }
+            @Override
+            public void focusLost(FocusEvent e) {
+                if (fld_period_end.getText().trim().isEmpty()) {
+                    fld_period_end.setText("gg/aa/yyyy");
+                }
+                fld_period_end.setForeground(Color.GRAY);
             }
         });
         // ## Period List and Operations
@@ -361,28 +443,197 @@ public class AgencyGUI extends JFrame{
             }
         };
 
-        Object[] col_price_list = {"ID", "Otel ID", "Dönem", "Pansiyon Tipi", "Yaş Dönemi"};
+        Object[] col_price_list = {"ID", "Otel ID", "Dönem", "Pansiyon Tipi", "Yaş Dönemi", "Fiyat"};
         mdl_price_list.setColumnIdentifiers(col_price_list);
 
         row_price_list = new Object[col_price_list.length];
         loadPriceModel();
-        loadPriceHotelCombo();
-
 
         tbl_price_list.setModel(mdl_price_list);
         tbl_price_list.getTableHeader().setReorderingAllowed(false);
         tbl_price_list.getColumnModel().getColumn(0).setMaxWidth(45);
         tbl_price_list.getColumnModel().getColumn(1).setMaxWidth(60);
-        loadPricePeriodCombo();
-        loadPriceHostelCombo();
+
+        cmb_price_hotel_name.addActionListener(e -> {
+            loadPriceHostelCombo();
+            loadPricePeriodCombo();
+        });
+
+        btn_price_add.addActionListener(e -> {
+            Item hotelItem = (Item) cmb_price_hotel_name.getSelectedItem();
+            Item periodItem = (Item) cmb_price_period.getSelectedItem();
+            String hostel = cmb_price_hostel.getSelectedItem().toString();
+            String selected_age = cmb_price_age.getSelectedItem().toString();
+            if(Helper.isFieldEmpty(fld_price_amount)) {
+                Helper.showMsg("fill");
+            } else {
+                int price = Integer.parseInt(fld_price_amount.getText());
+                if (Price.add(hotelItem.getKey(),Hotel.getFetch(hotelItem.getKey()).getCity(), periodItem.getKey(), Period.getFetch(periodItem.getKey()).getPeriod_start(), Period.getFetch(periodItem.getKey()).getPeriod_end(),hostel, selected_age, price)) {
+                    Helper.showMsg("done");
+                    loadPriceModel();
+                    fld_price_amount.setText(null);
+                }
+            }
+        });
+
+        tbl_price_list.getSelectionModel().addListSelectionListener(e -> {
+            try {
+                String select_price_id = tbl_price_list.getValueAt(tbl_price_list.getSelectedRow(), 0).toString();
+                fld_price_id.setText(select_price_id);
+            } catch (Exception ignored){
+            }
+        });
+
+        btn_price_delete.addActionListener(e -> {
+            if(Helper.isFieldEmpty(fld_price_id)) {
+                Helper.showMsg("fill");
+            } else {
+                if (Helper.confirm("sure")) {
+                    int price_id = Integer.parseInt(fld_price_id.getText());
+                    if(Price.delete(price_id)) {
+                        Helper.showMsg("done");
+                        loadPriceModel();
+                        fld_price_id.setText(null);
+                    } else {
+                        Helper.showMsg("error");
+                    }
+                }
+            }
+        });
 
         // ## Price List and Operations
+
+        // Room Search Table and Operations
+        mdl_room_search = new DefaultTableModel() {
+            @Override
+            public boolean isCellEditable(int row, int column) {
+                if (column == 0) {
+                    return false;
+                }
+                return super.isCellEditable(row, column);
+            }
+        };
+
+        Object[] col_room_search = {"Oda ID","Otel Adı", "Şehir", "Bölge", "Adres", "Telefon", "Email", "Yıldız", "Otel Hizmetleri", "Oda Adı", "Stok", "Yatak Sayısı", "TV", "Minibar", "Oyun Konsolu"};
+        mdl_room_search.setColumnIdentifiers(col_room_search);
+
+        row_room_search = new Object[col_room_search.length];
+
+        tbl_search_room.setModel(mdl_room_search);
+        tbl_search_room.getTableHeader().setReorderingAllowed(false);
+        tbl_search_room.getColumnModel().getColumn(0).setMaxWidth(80);
+        tbl_search_room.getColumnModel().getColumn(1).setMaxWidth(80);
+        tbl_search_room.getColumnModel().getColumn(2).setMaxWidth(80);
+
+        fld_search_check_in.setForeground(Color.GRAY);
+        fld_search_check_in.addFocusListener(new FocusListener() {
+            @Override
+            public void focusGained(FocusEvent e) {
+                if (fld_search_check_in.getText().trim().equals("gg/aa/yyyy")) {
+                    fld_search_check_in.setText("");
+                }
+                fld_search_check_in.setForeground(Color.BLACK);
+            }
+            @Override
+            public void focusLost(FocusEvent e) {
+                if (fld_search_check_in.getText().trim().isEmpty()) {
+                    fld_search_check_in.setText("gg/aa/yyyy");
+                }
+                fld_search_check_in.setForeground(Color.GRAY);
+            }
+        });
+
+        fld_search_check_out.setForeground(Color.GRAY);
+        fld_search_check_out.addFocusListener(new FocusListener() {
+            @Override
+            public void focusGained(FocusEvent e) {
+                if (fld_search_check_out.getText().trim().equals("gg/aa/yyyy")) {
+                    fld_search_check_out.setText("");
+                }
+                fld_search_check_out.setForeground(Color.BLACK);
+            }
+            @Override
+            public void focusLost(FocusEvent e) {
+                if (fld_search_check_out.getText().trim().isEmpty()) {
+                    fld_search_check_out.setText("gg/aa/yyyy");
+                }
+                fld_search_check_out.setForeground(Color.GRAY);
+            }
+        });
+
+        btn_search_hotel.addActionListener(e -> {
+            SimpleDateFormat formatter = new SimpleDateFormat("dd/MM/yyyy");
+            String city = cmb_search_city.getSelectedItem().toString();
+            String check_in = fld_search_check_in.getText().trim();
+            String check_out = fld_search_check_out.getText().trim();
+            loadSearchModel(Room.getRoomList(city, check_in, check_out));
+
+            Date firstDate = null;
+            Date secondDate = null;
+
+            try {
+                firstDate = formatter.parse(check_in);
+            } catch (ParseException ex) {
+                throw new RuntimeException(ex);
+            }
+            try {
+                secondDate = formatter.parse(check_out);
+            } catch (ParseException ex) {
+                throw new RuntimeException(ex);
+            }
+            long diffInMillies = Math.abs(secondDate.getTime() - firstDate.getTime());
+            String diff = String.valueOf(TimeUnit.DAYS.convert(diffInMillies, TimeUnit.MILLISECONDS));
+            fld_res_night.setText(diff);
+        });
+
+        tbl_search_room.getSelectionModel().addListSelectionListener(e -> {
+            try {
+                String select_room_id = tbl_search_room.getValueAt(tbl_search_room.getSelectedRow(), 0).toString();
+                fld_res_selected_id.setText(select_room_id);
+            } catch (Exception ignored){
+            }
+            int select_hotel_id = Room.getFetchByRoomId(Integer.parseInt(tbl_search_room.getValueAt(tbl_search_room.getSelectedRow(),0).toString())).getHotel_id();
+            loadHostelTypeCombo(select_hotel_id);
+        });
+        // ## Room Search Table and Operations
+
+    }
+
+    private void loadSearchModel(ArrayList<Room> list) {
+        DefaultTableModel clearModel = (DefaultTableModel) tbl_search_room.getModel();
+        clearModel.setRowCount(0);
+        int i;
+        for (Room obj : list) {
+            if (obj != null) {
+                i = 0;
+                row_room_search[i++] = obj.getId();
+                row_room_search[i++] = obj.getHotel().getName();
+                row_room_search[i++] = obj.getHotel().getCity();
+                row_room_search[i++] = obj.getHotel().getRegion();
+                row_room_search[i++] = obj.getHotel().getAddress();
+                row_room_search[i++] = obj.getHotel().getTelephone();
+                row_room_search[i++] = obj.getHotel().getEmail();
+                row_room_search[i++] = obj.getHotel().getStar();
+                row_room_search[i++] = obj.getHotel().getFeature();
+                row_room_search[i++] = obj.getRoom_name();
+                row_room_search[i++] = obj.getStock();
+                row_room_search[i++] = obj.getBed();
+                row_room_search[i++] = obj.getTv();
+                row_room_search[i++] = obj.getMinibar();
+                row_room_search[i++] = obj.getGame_console();
+                mdl_room_search.addRow(row_room_search);
+            } else {
+                Helper.showMsg("Aranan kriterlerde oda bulunamadı!");
+            }
+        }
     }
 
     private void loadPricePeriodCombo() {
         cmb_price_period.removeAllItems();
         for (Period obj : Period.getList()) {
-            if(obj.getHotel().getName().equals(cmb_price_hotel_name.getSelectedItem().toString())) {
+            if(cmb_price_hotel_name.getSelectedItem() == null) {
+                cmb_price_period.removeAllItems();
+            } else if(obj.getHotel().getName().equals(cmb_price_hotel_name.getSelectedItem().toString())) {
                 cmb_price_period.addItem(new Item(obj.getId(), obj.getPeriod()));
             }
         }
@@ -391,7 +642,9 @@ public class AgencyGUI extends JFrame{
     private void loadPriceHostelCombo() {
         cmb_price_hostel.removeAllItems();
         for (Hostel obj : Hostel.getList()) {
-            if(obj.getHotel().getName().equals(cmb_price_hotel_name.getSelectedItem().toString())) {
+             if(cmb_price_hotel_name.getSelectedItem() == null) {
+                cmb_price_period.removeAllItems();
+            } else if(obj.getHotel().getName().equals(cmb_price_hotel_name.getSelectedItem().toString())) {
                 cmb_price_hostel.addItem(new Item(obj.getHotel().getId(), obj.getHostel()));
             }
         }
@@ -412,9 +665,10 @@ public class AgencyGUI extends JFrame{
             i = 0;
             row_price_list[i++] = obj.getId();
             row_price_list[i++] = obj.getHotel_id();
-            row_price_list[i++] = obj.getPeriod();
+            row_price_list[i++] = obj.getPeriod().getPeriod();
             row_price_list[i++] = obj.getHostel();
             row_price_list[i++] = obj.getAge();
+            row_price_list[i++] = obj.getPrice();
             mdl_price_list.addRow(row_price_list);
         }
     }
@@ -434,6 +688,15 @@ public class AgencyGUI extends JFrame{
             row_room_list[i++] = obj.getMinibar();
             row_room_list[i++] = obj.getGame_console();
             mdl_room_list.addRow(row_room_list);
+        }
+    }
+
+    public void loadHostelTypeCombo(int hotel_id) {
+        cmb_res_hostel_type.removeAllItems();
+        for (Hostel obj : Hostel.getList()) {
+            if(hotel_id == obj.getHotel_id()) {
+                cmb_res_hostel_type.addItem(new Item(obj.getId(), obj.getHostel()));
+            }
         }
     }
 
@@ -471,7 +734,6 @@ public class AgencyGUI extends JFrame{
         int i;
         for (Hotel obj : Hotel.getList()) {
             i = 0;
-            System.out.println(obj.getName());
             row_hotel_list[i++] = obj.getId();
             row_hotel_list[i++] = obj.getName();
             row_hotel_list[i++] = obj.getCity();

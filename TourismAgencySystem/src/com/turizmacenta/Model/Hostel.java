@@ -97,4 +97,15 @@ public class Hostel {
         }
         return obj;
     }
+
+    public static boolean delete(int hotel_id) {
+        String queryHostel = "DELETE FROM hostel where hotel_id = ?";
+        try {
+            PreparedStatement pr = DBConnector.getInstance().prepareStatement(queryHostel);
+            pr.setInt(1,hotel_id);
+            return pr.executeUpdate() != -1;
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+    }
 }

@@ -6,7 +6,10 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 
 public class Period {
     private int id;
@@ -101,13 +104,14 @@ public class Period {
         }
     }
 
-    public static boolean add(int hotel_id, String period_start, String period_end) {
-        String query = "INSERT INTO period (hotel_id, period_start, period_end) VALUES (?,?,?)";
+    public static boolean add(int hotel_id, String period_start, String period_end, String period) {
+        String query = "INSERT INTO period (hotel_id, period_start, period_end, period) VALUES (?,?,?,?)";
         try {
             PreparedStatement pr = DBConnector.getInstance().prepareStatement(query);
             pr.setInt(1, hotel_id);
             pr.setString(2, period_start);
             pr.setString(3, period_end);
+            pr.setString(4, period);
             return pr.executeUpdate() != -1;
         } catch (SQLException e) {
             throw new RuntimeException(e);
@@ -128,5 +132,32 @@ public class Period {
             throw new RuntimeException(e);
         }
         return obj;
+    }
+
+    public static Period getFetchByHotelId(int hotel_id) {
+        Period obj = null;
+        String query = "SELECT * FROM period WHERE hotel_id = ?";
+        try {
+            PreparedStatement pr = DBConnector.getInstance().prepareStatement(query);
+            pr.setInt(1,hotel_id);
+            ResultSet rs = pr.executeQuery();
+            if (rs.next()) {
+                obj = new Period(rs.getInt("id"), rs.getInt("hotel_id"), rs.getString("period_start"), rs.getString("period_end"));
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+        return obj;
+    }
+
+    public static boolean deleteHotel(int hotel_id) {
+        String query = "DELETE FROM period WHERE hotel_id = ?";
+        try {
+            PreparedStatement pr = DBConnector.getInstance().prepareStatement(query);
+            pr.setInt(1, hotel_id);
+            return pr.executeUpdate() != -1;
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
     }
 }

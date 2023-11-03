@@ -6,7 +6,11 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 
 public class Room {
     private int id;
@@ -146,5 +150,73 @@ public class Room {
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    public static boolean deleteHotel(int hotel_id) {
+        String query = "DELETE FROM room WHERE hotel_id = ?";
+        try {
+            PreparedStatement pr = DBConnector.getInstance().prepareStatement(query);
+            pr.setInt(1,hotel_id);
+            return pr.executeUpdate() != -1;
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public static Room getFetchByRoomId(int room_id) {
+        Room obj = null;
+        String query = "SELECT * FROM room WHERE id = ?";
+        try {
+            PreparedStatement pr = DBConnector.getInstance().prepareStatement(query);
+            pr.setInt(1,room_id);
+            ResultSet rs = pr.executeQuery();
+            if (rs.next()) {
+                obj = new Room(rs.getInt("id"), rs.getInt("hotel_id"),
+                        rs.getString("room_name"), rs.getInt("stock"),
+                        rs.getString("bed"), rs.getString("tv"),
+                        rs.getString("minibar"), rs.getString("game_console"));
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+        return obj;
+    }
+
+    public static ArrayList<Room> getRoomList(String city, String check_in_date, String check_out_date) {
+        ArrayList<Room> roomList = new ArrayList<>();
+        SimpleDateFormat formatter = new SimpleDateFormat("dd/MM/yyyy");
+        Date fieldPeriodStart;
+        Date fieldPeriodEnd;
+        String query = null;
+        try {
+            fieldPeriodStart = formatter.parse(check_in_date);
+        } catch (ParseException e) {
+            throw new RuntimeException(e);
+        }
+        try {
+            fieldPeriodEnd = formatter.parse(check_out_date);
+        } catch (ParseException e) {
+            throw new RuntimeException(e);
+        }
+        for(Room obj : Room.getList()) {
+            if(obj.getHotel().getCity().equals(city)) {
+                Date dataPeriodStart;
+                Date dataPeriodEnd;
+                try {
+                    dataPeriodStart = formatter.parse(Period.getFetchByHotelId(obj.hotel_id).getPeriod_start());
+                } catch (ParseException e) {
+                    throw new RuntimeException(e);
+                }
+                try {
+                    dataPeriodEnd = formatter.parse(Period.getFetchByHotelId(obj.hotel_id).getPeriod_end());
+                } catch (ParseException e) {
+                    throw new RuntimeException(e);
+                }
+                if(dataPeriodStart.before(fieldPeriodStart) && fieldPeriodEnd.before(dataPeriodEnd)) {
+                    roomList.add(Room.getFetchByRoomId(obj.getId()));
+                }
+            }
+        }
+        return roomList;
     }
 }
