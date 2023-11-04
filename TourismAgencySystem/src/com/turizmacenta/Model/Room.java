@@ -187,7 +187,6 @@ public class Room {
         SimpleDateFormat formatter = new SimpleDateFormat("dd/MM/yyyy");
         Date fieldPeriodStart;
         Date fieldPeriodEnd;
-        String query = null;
         try {
             fieldPeriodStart = formatter.parse(check_in_date);
         } catch (ParseException e) {

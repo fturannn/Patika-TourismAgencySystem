@@ -12,11 +12,6 @@ import java.awt.*;
 import java.awt.event.*;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.time.Duration;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
-import java.time.temporal.Temporal;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.concurrent.TimeUnit;
@@ -95,14 +90,10 @@ public class AgencyGUI extends JFrame{
     private JComboBox cmb_search_child;
     private JButton btn_search_hotel;
     private JComboBox cmb_hotel_city;
-    private JTextField fld_res_name;
-    private JTextField fld_res_tc;
-    private JTextField fld_res_telephone;
-    private JTextField fld_res_email;
     private JTextField fld_res_selected_id;
-    private JButton btn_reservation;
     private JComboBox cmb_res_hostel_type;
     private JTextField fld_res_night;
+    private JButton btn_go_reservation;
     private DefaultTableModel mdl_hotel_list;
     private Object [] row_hotel_list;
     private DefaultTableModel mdl_period_list;
@@ -152,6 +143,7 @@ public class AgencyGUI extends JFrame{
 
         row_hotel_list = new Object[col_hotel_list.length];
         loadHotelModel();
+        loadPriceHotelCombo();
 
         tbl_hotel_list.setModel(mdl_hotel_list);
         tbl_hotel_list.getTableHeader().setReorderingAllowed(false); // Tablo başlıklarının düzenlenmesini engeller
@@ -566,7 +558,6 @@ public class AgencyGUI extends JFrame{
             String city = cmb_search_city.getSelectedItem().toString();
             String check_in = fld_search_check_in.getText().trim();
             String check_out = fld_search_check_out.getText().trim();
-            loadSearchModel(Room.getRoomList(city, check_in, check_out));
 
             Date firstDate = null;
             Date secondDate = null;
@@ -584,6 +575,7 @@ public class AgencyGUI extends JFrame{
             long diffInMillies = Math.abs(secondDate.getTime() - firstDate.getTime());
             String diff = String.valueOf(TimeUnit.DAYS.convert(diffInMillies, TimeUnit.MILLISECONDS));
             fld_res_night.setText(diff);
+            loadSearchModel(Room.getRoomList(city, check_in, check_out));
         });
 
         tbl_search_room.getSelectionModel().addListSelectionListener(e -> {
@@ -594,6 +586,17 @@ public class AgencyGUI extends JFrame{
             }
             int select_hotel_id = Room.getFetchByRoomId(Integer.parseInt(tbl_search_room.getValueAt(tbl_search_room.getSelectedRow(),0).toString())).getHotel_id();
             loadHostelTypeCombo(select_hotel_id);
+        });
+
+        btn_go_reservation.addActionListener(e -> {
+            int child_number = Integer.parseInt(cmb_search_child.getSelectedItem().toString());
+            int adult_number = Integer.parseInt(cmb_search_adult.getSelectedItem().toString());
+            int selected_room_id = Integer.parseInt(fld_res_selected_id.getText());
+            String selected_hostel_type = cmb_res_hostel_type.getSelectedItem().toString();
+            String total_night = fld_res_night.getText();
+            String check_in = fld_search_check_in.getText().trim();
+            String check_out = fld_search_check_out.getText().trim();
+            ReservationGUI resGUI = new ReservationGUI(child_number, adult_number, selected_room_id, selected_hostel_type, total_night, check_in, check_out);
         });
         // ## Room Search Table and Operations
 
