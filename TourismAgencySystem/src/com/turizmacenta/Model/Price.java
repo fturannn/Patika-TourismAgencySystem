@@ -6,6 +6,8 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 
@@ -20,16 +22,21 @@ public class Price {
     private int price;
     private String period_start;
     private String period_end;
+    private int room_id;
+    private String room_name;
+    private Room room;
 
-    public Price(int id, int hotel_id, int period_id, String hostel, String age, int price) {
+    public Price(int id, int hotel_id, int period_id, String hostel, int room_id, String age, int price) {
         this.id = id;
         this.hotel_id = hotel_id;
         this.period_id = period_id;
         this.hostel = hostel;
+        this.room_name = Room.getFetchByRoomId(room_id).getRoom_name();
         this.age = age;
         this.price = price;
         this.hotel = Hotel.getFetch(hotel_id);
         this.period = Period.getFetch(period_id);
+        this.room = Room.getFetchByRoomId(room_id);
         this.period_start = period.getPeriod_start();
         this.period_end = period.getPeriod_end();
     }
@@ -114,6 +121,30 @@ public class Price {
         this.period_end = period_end;
     }
 
+    public int getRoom_id() {
+        return room_id;
+    }
+
+    public void setRoom_id(int room_id) {
+        this.room_id = room_id;
+    }
+
+    public String getRoom_name() {
+        return room_name;
+    }
+
+    public void setRoom_name(String room_name) {
+        this.room_name = room_name;
+    }
+
+    public Room getRoom() {
+        return room;
+    }
+
+    public void setRoom(Room room) {
+        this.room = room;
+    }
+
     public static ArrayList<Price> getList() {
         ArrayList<Price> priceList = new ArrayList<>();
         String query = "SELECT * FROM price";
@@ -122,7 +153,7 @@ public class Price {
             Statement st = DBConnector.getInstance().createStatement();
             ResultSet rs = st.executeQuery(query);
             while (rs.next()) {
-                obj = new Price(rs.getInt("id"), rs.getInt("hotel_id"), rs.getInt("period_id"), rs.getString("hostel"), rs.getString("age"), rs.getInt("price"));
+                obj = new Price(rs.getInt("id"), rs.getInt("hotel_id"), rs.getInt("period_id"), rs.getString("hostel"), rs.getInt("room_id"), rs.getString("age"), rs.getInt("price"));
                 priceList.add(obj);
             }
         } catch (SQLException e) {
@@ -131,8 +162,8 @@ public class Price {
         return priceList;
     }
 
-    public static boolean add(int hotel_id, String city, int period_id, String period_start, String period_end, String hostel, String age, int price) {
-        String query = "INSERT INTO price (hotel_id, city, period_id, period_start, period_end, hostel, age, price) VALUES (?,?,?,?,?,?,?,?)";
+    public static boolean add(int hotel_id, String city, int period_id, String period_start, String period_end, String hostel, int room_id, String age, int price) {
+        String query = "INSERT INTO price (hotel_id, city, period_id, period_start, period_end, hostel, room_id, age, price) VALUES (?,?,?,?,?,?,?,?,?)";
         try {
             PreparedStatement pr = DBConnector.getInstance().prepareStatement(query);
             pr.setInt(1,hotel_id);
@@ -141,8 +172,9 @@ public class Price {
             pr.setString(4,period_start);
             pr.setString(5,period_end);
             pr.setString(6,hostel);
-            pr.setString(7,age);
-            pr.setInt(8,price);
+            pr.setInt(7, room_id);
+            pr.setString(8,age);
+            pr.setInt(9,price);
             return pr.executeUpdate() != -1;
         } catch (SQLException e) {
             throw new RuntimeException(e);

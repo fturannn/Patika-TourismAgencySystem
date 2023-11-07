@@ -1,6 +1,7 @@
 package com.turizmacenta.Model;
 
 import com.turizmacenta.Helper.DBConnector;
+import com.turizmacenta.Helper.Helper;
 
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -198,24 +199,38 @@ public class Room {
             throw new RuntimeException(e);
         }
         for(Room obj : Room.getList()) {
-            if(obj.getHotel().getCity().equals(city)) {
-                Date dataPeriodStart;
-                Date dataPeriodEnd;
-                try {
-                    dataPeriodStart = formatter.parse(Period.getFetchByHotelId(obj.hotel_id).getPeriod_start());
-                } catch (ParseException e) {
-                    throw new RuntimeException(e);
-                }
-                try {
-                    dataPeriodEnd = formatter.parse(Period.getFetchByHotelId(obj.hotel_id).getPeriod_end());
-                } catch (ParseException e) {
-                    throw new RuntimeException(e);
-                }
-                if(dataPeriodStart.before(fieldPeriodStart) && fieldPeriodEnd.before(dataPeriodEnd)) {
-                    roomList.add(Room.getFetchByRoomId(obj.getId()));
+            for(Period obj2 : Period.getListByHotelId(obj.getHotel_id())){
+                if(obj.getHotel().getCity().equals(city)) {
+                    Date dataPeriodStart;
+                    Date dataPeriodEnd;
+                    try {
+                        dataPeriodStart = formatter.parse(obj2.getPeriod_start());
+                    } catch (ParseException e) {
+                        throw new RuntimeException(e);
+                    }
+                    try {
+                        dataPeriodEnd = formatter.parse(obj2.getPeriod_end());
+                    } catch (ParseException e) {
+                        throw new RuntimeException(e);
+                    }
+                    if (dataPeriodStart.before(fieldPeriodStart) && fieldPeriodEnd.before(dataPeriodEnd)) {
+                        roomList.add(Room.getFetchByRoomId(obj.getId()));
+                    }
                 }
             }
         }
         return roomList;
+    }
+
+    public static boolean updateStock(int room_stock, int id) {
+        String query = "UPDATE room SET stock=? WHERE id=?";
+        try {
+            PreparedStatement pr = DBConnector.getInstance().prepareStatement(query);
+            pr.setInt(1,room_stock - 1);
+            pr.setInt(2,id);
+            return pr.executeUpdate() != -1;
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
     }
 }

@@ -134,20 +134,22 @@ public class Period {
         return obj;
     }
 
-    public static Period getFetchByHotelId(int hotel_id) {
-        Period obj = null;
-        String query = "SELECT * FROM period WHERE hotel_id = ?";
+    public static ArrayList<Period> getListByHotelId(int hotel_id) {
+        ArrayList<Period> periodList = new ArrayList<>();
+        String query = "SELECT * FROM period where hotel_id = ?";
+        Period obj;
         try {
             PreparedStatement pr = DBConnector.getInstance().prepareStatement(query);
             pr.setInt(1,hotel_id);
             ResultSet rs = pr.executeQuery();
-            if (rs.next()) {
+            while (rs.next()) {
                 obj = new Period(rs.getInt("id"), rs.getInt("hotel_id"), rs.getString("period_start"), rs.getString("period_end"));
+                periodList.add(obj);
             }
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
-        return obj;
+        return periodList;
     }
 
     public static boolean deleteHotel(int hotel_id) {
