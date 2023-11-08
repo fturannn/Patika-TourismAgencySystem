@@ -23,10 +23,13 @@ public class Room {
     private String tv;
     private String minibar;
     private String game_console;
+    private Period period;
+    private int period_id;
 
-    public Room(int id, int hotel_id, String room_name, int stock, String bed, String tv, String minibar, String game_console) {
+    public Room(int id, int hotel_id, int period_id, String room_name, int stock, String bed, String tv, String minibar, String game_console) {
         this.id = id;
         this.hotel_id = hotel_id;
+        this.period_id = period_id;
         this.room_name = room_name;
         this.stock = stock;
         this.bed = bed;
@@ -34,6 +37,7 @@ public class Room {
         this.minibar = minibar;
         this.game_console = game_console;
         this.hotel = Hotel.getFetch(hotel_id);
+        this.period = Period.getFetch(period_id);
     }
 
     public int getId() {
@@ -108,6 +112,22 @@ public class Room {
         this.game_console = game_console;
     }
 
+    public Period getPeriod() {
+        return period;
+    }
+
+    public void setPeriod(Period period) {
+        this.period = period;
+    }
+
+    public int getPeriod_id() {
+        return period_id;
+    }
+
+    public void setPeriod_id(int period_id) {
+        this.period_id = period_id;
+    }
+
     public static ArrayList<Room> getList() {
         ArrayList<Room> roomList = new ArrayList<>();
         String query = "SELECT * FROM room";
@@ -116,7 +136,7 @@ public class Room {
             Statement st = DBConnector.getInstance().createStatement();
             ResultSet rs = st.executeQuery(query);
             while (rs.next()) {
-                obj = new Room(rs.getInt("id"), rs.getInt("hotel_id"), rs.getString("room_name"), rs.getInt("stock"), rs.getString("bed"), rs.getString("tv"), rs.getString("minibar"), rs.getString("game_console"));
+                obj = new Room(rs.getInt("id"), rs.getInt("hotel_id"), rs.getInt("period_id"), rs.getString("room_name"), rs.getInt("stock"), rs.getString("bed"), rs.getString("tv"), rs.getString("minibar"), rs.getString("game_console"));
                 roomList.add(obj);
             }
         } catch (SQLException e) {
@@ -125,17 +145,18 @@ public class Room {
         return roomList;
     }
 
-    public static boolean add(int hotel_id, String room_name, int stock, String bed, String tv, String minibar, String game_console) {
-        String query = "INSERT INTO room (hotel_id, room_name, stock, bed, tv, minibar, game_console) VALUES (?,?,?,?,?,?,?)";
+    public static boolean add(int hotel_id, int period_id, String room_name, int stock, String bed, String tv, String minibar, String game_console) {
+        String query = "INSERT INTO room (hotel_id, period_id, room_name, stock, bed, tv, minibar, game_console) VALUES (?,?,?,?,?,?,?,?)";
         try {
             PreparedStatement pr = DBConnector.getInstance().prepareStatement(query);
             pr.setInt(1,hotel_id);
-            pr.setString(2,room_name);
-            pr.setInt(3,stock);
-            pr.setString(4,bed);
-            pr.setString(5,tv);
-            pr.setString(6,minibar);
-            pr.setString(7,game_console);
+            pr.setInt(2, period_id);
+            pr.setString(3,room_name);
+            pr.setInt(4,stock);
+            pr.setString(5,bed);
+            pr.setString(6,tv);
+            pr.setString(7,minibar);
+            pr.setString(8,game_console);
             return pr.executeUpdate() != -1;
         } catch (SQLException e) {
             throw new RuntimeException(e);
@@ -172,7 +193,7 @@ public class Room {
             pr.setInt(1,room_id);
             ResultSet rs = pr.executeQuery();
             if (rs.next()) {
-                obj = new Room(rs.getInt("id"), rs.getInt("hotel_id"),
+                obj = new Room(rs.getInt("id"), rs.getInt("hotel_id"), rs.getInt("period_id"),
                         rs.getString("room_name"), rs.getInt("stock"),
                         rs.getString("bed"), rs.getString("tv"),
                         rs.getString("minibar"), rs.getString("game_console"));
@@ -199,23 +220,21 @@ public class Room {
             throw new RuntimeException(e);
         }
         for(Room obj : Room.getList()) {
-            for(Period obj2 : Period.getListByHotelId(obj.getHotel_id())){
-                if(obj.getHotel().getCity().equals(city)) {
-                    Date dataPeriodStart;
-                    Date dataPeriodEnd;
-                    try {
-                        dataPeriodStart = formatter.parse(obj2.getPeriod_start());
-                    } catch (ParseException e) {
-                        throw new RuntimeException(e);
-                    }
-                    try {
-                        dataPeriodEnd = formatter.parse(obj2.getPeriod_end());
-                    } catch (ParseException e) {
-                        throw new RuntimeException(e);
-                    }
-                    if (dataPeriodStart.before(fieldPeriodStart) && fieldPeriodEnd.before(dataPeriodEnd)) {
-                        roomList.add(Room.getFetchByRoomId(obj.getId()));
-                    }
+            if(obj.getHotel().getCity().equals(city)) {
+                Date dataPeriodStart;
+                Date dataPeriodEnd;
+                try {
+                    dataPeriodStart = formatter.parse(obj.getPeriod().getPeriod_start());
+                } catch (ParseException e) {
+                    throw new RuntimeException(e);
+                }
+                try {
+                    dataPeriodEnd = formatter.parse(obj.getPeriod().getPeriod_end());
+                } catch (ParseException e) {
+                    throw new RuntimeException(e);
+                }
+                if (dataPeriodStart.before(fieldPeriodStart) && fieldPeriodEnd.before(dataPeriodEnd)) {
+                    roomList.add(Room.getFetchByRoomId(obj.getId()));
                 }
             }
         }

@@ -98,6 +98,7 @@ public class AgencyGUI extends JFrame{
     private JTable tbl_reservation_list;
     private JPanel pnl_reservation;
     private JScrollPane scrl_reservation_list;
+    private JComboBox cmb_room_period;
     private DefaultTableModel mdl_hotel_list;
     private Object [] row_hotel_list;
     private DefaultTableModel mdl_period_list;
@@ -373,12 +374,16 @@ public class AgencyGUI extends JFrame{
             }
         };
 
-        Object[] col_room_list = {"ID", "Otel ID", "Oda Adı", "Stok Durumu", "Yatak Sayısı", "Televizyon", "Minibar", "Oyun Konsolu"};
+        Object[] col_room_list = {"ID", "Otel ID", "Dönem", "Oda Adı", "Stok Durumu", "Yatak Sayısı", "Televizyon", "Minibar", "Oyun Konsolu"};
         mdl_room_list.setColumnIdentifiers(col_room_list);
 
         row_room_list = new Object[col_room_list.length];
         loadRoomModel();
         loadHotelCombo();
+
+        cmb_room_hotel_name.addActionListener(e -> {
+            loadRoomPeriodCombo();
+        });
 
         tbl_room_list.setModel(mdl_room_list);
         tbl_room_list.getTableHeader().setReorderingAllowed(false);
@@ -412,6 +417,7 @@ public class AgencyGUI extends JFrame{
 
         btn_add_room.addActionListener(e -> {
             Item hotelItem = (Item) cmb_room_hotel_name.getSelectedItem();
+            Item periodItem = (Item) cmb_room_period.getSelectedItem();
             if(Helper.isFieldEmpty(fld_room_stock)) {
                 Helper.showMsg("fill");
             } else {
@@ -421,7 +427,7 @@ public class AgencyGUI extends JFrame{
                 String game_console = cmb_room_game_console.getSelectedItem().toString();
                 String room_name = cmb_room_name.getSelectedItem().toString();
                 int room_stock = Integer.parseInt(fld_room_stock.getText().toString());
-                if (Room.add(hotelItem.getKey(), room_name, room_stock, bed, tv, minibar, game_console)) {
+                if (Room.add(hotelItem.getKey(), periodItem.getKey(), room_name, room_stock, bed, tv, minibar, game_console)) {
                     Helper.showMsg("done");
                     loadRoomModel();
                     fld_room_stock.setText(null);
@@ -455,6 +461,8 @@ public class AgencyGUI extends JFrame{
         cmb_price_hotel_name.addActionListener(e -> {
             loadPriceHostelCombo();
             loadPricePeriodCombo();
+        });
+        cmb_price_period.addActionListener(e -> {
             loadPriceRoomCombo();
         });
 
@@ -604,6 +612,7 @@ public class AgencyGUI extends JFrame{
             String total_night = fld_res_night.getText();
             String check_in = fld_search_check_in.getText().trim();
             String check_out = fld_search_check_out.getText().trim();
+            String city = cmb_search_city.getSelectedItem().toString();
             ReservationGUI resGUI = new ReservationGUI(child_number, adult_number, selected_room_id, selected_hostel_type, total_night, check_in, check_out);
             resGUI.addWindowListener(new WindowAdapter() {
                 @Override
@@ -638,7 +647,6 @@ public class AgencyGUI extends JFrame{
         tbl_reservation_list.getColumnModel().getColumn(0).setMaxWidth(45);
         loadReservationModel();
         // ## Reservation List and Operations
-
     }
 
     private void loadReservationModel() {
@@ -691,17 +699,13 @@ public class AgencyGUI extends JFrame{
         }
     }
 
-    private void loadSearchModel() {
-        DefaultTableModel clearModel = (DefaultTableModel) tbl_search_room.getModel();
-        clearModel.setRowCount(0);
-        }
-
     private void loadPriceRoomCombo() {
         cmb_price_room_name.removeAllItems();
         for (Room obj : Room.getList()) {
-            if(cmb_price_hotel_name.getSelectedItem() == null) {
+            if(cmb_price_period.getSelectedItem() == null) {
                 cmb_price_room_name.removeAllItems();
-            } else if(obj.getHotel().getName().equals(cmb_price_hotel_name.getSelectedItem().toString())) {
+            } else if(obj.getPeriod().getPeriod().equals(cmb_price_period.getSelectedItem().toString()) &&
+                    obj.getHotel().getName().equals(cmb_price_hotel_name.getSelectedItem().toString())) {
                 cmb_price_room_name.addItem(new Item(obj.getId(), obj.getRoom_name()));
             }
         }
@@ -728,6 +732,8 @@ public class AgencyGUI extends JFrame{
             }
         }
     }
+    // TODO: 7.11.2023 Burada cmb_price_hostel yerine cmb_price_period yazılmış. Ayrıca obj.getId yerine obj.getHotel.getId yazılmış.
+    //  Oda yönetimine period ekledikten sonra bir bak
 
     private void loadPriceHotelCombo() {
         cmb_price_hotel_name.removeAllItems();
@@ -761,6 +767,7 @@ public class AgencyGUI extends JFrame{
             i = 0;
             row_room_list[i++] = obj.getId();
             row_room_list[i++] = obj.getHotel_id();
+            row_room_list[i++] = obj.getPeriod().getPeriod();
             row_room_list[i++] = obj.getRoom_name();
             row_room_list[i++] = obj.getStock();
             row_room_list[i++] = obj.getBed();
@@ -768,6 +775,17 @@ public class AgencyGUI extends JFrame{
             row_room_list[i++] = obj.getMinibar();
             row_room_list[i++] = obj.getGame_console();
             mdl_room_list.addRow(row_room_list);
+        }
+    }
+
+    private void loadRoomPeriodCombo() {
+        cmb_room_period.removeAllItems();
+        for (Period obj : Period.getList()) {
+            if(cmb_room_hotel_name.getSelectedItem() == null) {
+                cmb_room_period.removeAllItems();
+            } else if(obj.getHotel().getName().equals(cmb_room_hotel_name.getSelectedItem().toString())) {
+                cmb_room_period.addItem(new Item(obj.getId(), obj.getPeriod()));
+            }
         }
     }
 
