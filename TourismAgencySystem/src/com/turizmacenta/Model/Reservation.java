@@ -20,11 +20,14 @@ public class Reservation {
     private String telephone;
     private String email;
     private String total;
+    private Room room;
+    private int room_id;
 
     public Reservation() {}
 
-    public Reservation(int id, String period, String hotel, String hostel, String night, String person, String name, String tc, String telephone, String email, String total) {
+    public Reservation(int id, int room_id, String period, String hotel, String hostel, String night, String person, String name, String tc, String telephone, String email, String total) {
         this.id = id;
+        this.room_id = room_id;
         this.period = period;
         this.hotel = hotel;
         this.hostel = hostel;
@@ -35,6 +38,7 @@ public class Reservation {
         this.telephone = telephone;
         this.email = email;
         this.total = total;
+        this.room = Room.getFetchByRoomId(room_id);
     }
 
     public int getId() {
@@ -125,20 +129,37 @@ public class Reservation {
         this.total = total;
     }
 
-    public static boolean add(String period, String hotel, String hostel, String night, String person, String name, String tc, String telephone, String email, String total) {
-        String query = "INSERT INTO reservation (period, hotel, hostel, night, person, name, tc, telephone, email, total) VALUES (?,?,?,?,?,?,?,?,?,?)";
+    public Room getRoom() {
+        return room;
+    }
+
+    public void setRoom(Room room) {
+        this.room = room;
+    }
+
+    public int getRoom_id() {
+        return room_id;
+    }
+
+    public void setRoom_id(int room_id) {
+        this.room_id = room_id;
+    }
+
+    public static boolean add(int room_id, String period, String hotel, String hostel, String night, String person, String name, String tc, String telephone, String email, String total) {
+        String query = "INSERT INTO reservation (room_id, period, hotel, hostel, night, person, name, tc, telephone, email, total) VALUES (?,?,?,?,?,?,?,?,?,?,?)";
         try {
             PreparedStatement pr = DBConnector.getInstance().prepareStatement(query);
-            pr.setString(1,period);
-            pr.setString(2,hotel);
-            pr.setString(3,hostel);
-            pr.setString(4,night);
-            pr.setString(5,person);
-            pr.setString(6,name);
-            pr.setString(7,tc);
-            pr.setString(8,telephone);
-            pr.setString(9,email);
-            pr.setString(10,total);
+            pr.setInt(1,room_id);
+            pr.setString(2,period);
+            pr.setString(3,hotel);
+            pr.setString(4,hostel);
+            pr.setString(5,night);
+            pr.setString(6,person);
+            pr.setString(7,name);
+            pr.setString(8,tc);
+            pr.setString(9,telephone);
+            pr.setString(10,email);
+            pr.setString(11,total);
             return pr.executeUpdate() != -1;
         } catch (SQLException e) {
             throw new RuntimeException(e);
@@ -155,6 +176,7 @@ public class Reservation {
             while (rs.next()) {
                 obj = new Reservation();
                 obj.setId(rs.getInt("id"));
+                obj.setRoom_id(rs.getInt("room_id"));
                 obj.setPeriod(rs.getString("period"));
                 obj.setHotel(rs.getString("hotel"));
                 obj.setHostel(rs.getString("hostel"));
@@ -171,5 +193,34 @@ public class Reservation {
             throw new RuntimeException(e);
         }
         return reservationList;
+    }
+
+    public static boolean delete(int reservation_id) {
+        String queryHostel = "DELETE FROM reservation where id = ?";
+        try {
+            PreparedStatement pr = DBConnector.getInstance().prepareStatement(queryHostel);
+            pr.setInt(1,reservation_id);
+            return pr.executeUpdate() != -1;
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public static Reservation getFetch(int id) {
+        Reservation obj = null;
+        String query = "SELECT * FROM reservation WHERE id = ?";
+        try {
+            PreparedStatement pr = DBConnector.getInstance().prepareStatement(query);
+            pr.setInt(1,id);
+            ResultSet rs = pr.executeQuery();
+            if (rs.next()) {
+                obj = new Reservation(rs.getInt("id"), rs.getInt("room_id"), rs.getString("period"), rs.getString("hotel"),
+                        rs.getString("hostel"), rs.getString("night"), rs.getString("person"), rs.getString("name"),
+                        rs.getString("tc"), rs.getString("telephone"), rs.getString("email"), rs.getString("total"));
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+        return obj;
     }
 }

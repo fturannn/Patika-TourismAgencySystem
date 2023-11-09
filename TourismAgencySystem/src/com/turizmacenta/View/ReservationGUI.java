@@ -34,6 +34,7 @@ public class ReservationGUI extends JFrame {
     private String check_in;
     private String check_out;
     private int room_stock;
+    private Room room;
 
     public ReservationGUI(int child_number, int adult_number, int selected_room_id, String selected_hostel_type, String total_night, String check_in, String check_out) {
         this.child_number = child_number;
@@ -43,7 +44,8 @@ public class ReservationGUI extends JFrame {
         this.total_night = total_night;
         this.check_in = check_in;
         this.check_out = check_out;
-        this.room_stock = Room.getFetchByRoomId(selected_room_id).getStock();
+        this.room = Room.getFetchByRoomId(selected_room_id);
+        this.room_stock = room.getStock();
 
         SimpleDateFormat formatter = new SimpleDateFormat("dd/MM/yyyy");
         add(wrapper);
@@ -117,8 +119,8 @@ public class ReservationGUI extends JFrame {
             if(Helper.isFieldEmpty(fld_name) || Helper.isFieldEmpty(fld_tc) || Helper.isFieldEmpty(fld_telephone) || Helper.isFieldEmpty(fld_email)) {
                 Helper.showMsg("fill");
             } else {
-                if(Reservation.add(res_period, hotel, hostel, night, person, name, tc, telephone, email, total)) {
-                    Room.updateStock(room_stock, selected_room_id);
+                if(Reservation.add(selected_room_id, res_period, hotel, hostel, night, person, name, tc, telephone, email, total)) {
+                    Room.updateStock(room_stock-1, selected_room_id);
                     Helper.showMsg("done");
                     dispose();
                 } else {

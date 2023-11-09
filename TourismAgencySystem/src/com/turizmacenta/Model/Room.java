@@ -245,7 +245,19 @@ public class Room {
         String query = "UPDATE room SET stock=? WHERE id=?";
         try {
             PreparedStatement pr = DBConnector.getInstance().prepareStatement(query);
-            pr.setInt(1,room_stock - 1);
+            pr.setInt(1,room_stock);
+            pr.setInt(2,id);
+            return pr.executeUpdate() != -1;
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public static boolean increaseStock(int room_stock, int id) {
+        String query = "UPDATE room SET stock=? WHERE id=?";
+        try {
+            PreparedStatement pr = DBConnector.getInstance().prepareStatement(query);
+            pr.setInt(1,room_stock + 1);
             pr.setInt(2,id);
             return pr.executeUpdate() != -1;
         } catch (SQLException e) {

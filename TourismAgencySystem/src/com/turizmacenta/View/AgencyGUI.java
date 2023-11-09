@@ -99,6 +99,9 @@ public class AgencyGUI extends JFrame{
     private JPanel pnl_reservation;
     private JScrollPane scrl_reservation_list;
     private JComboBox cmb_room_period;
+    private JButton btn_delete_reservation;
+    private JTextField fld_reservation_id;
+    private JPanel pnl_reservation_delete;
     private DefaultTableModel mdl_hotel_list;
     private Object [] row_hotel_list;
     private DefaultTableModel mdl_period_list;
@@ -600,8 +603,7 @@ public class AgencyGUI extends JFrame{
                 fld_res_selected_id.setText(select_room_id);
             } catch (Exception ignored){
             }
-            int select_hotel_id = Room.getFetchByRoomId(Integer.parseInt(tbl_search_room.getValueAt(tbl_search_room.getSelectedRow(),0).toString())).getHotel_id();
-            loadHostelTypeCombo(select_hotel_id);
+            loadHostelTypeCombo();
         });
 
         btn_go_reservation.addActionListener(e -> {
@@ -612,14 +614,12 @@ public class AgencyGUI extends JFrame{
             String total_night = fld_res_night.getText();
             String check_in = fld_search_check_in.getText().trim();
             String check_out = fld_search_check_out.getText().trim();
-            String city = cmb_search_city.getSelectedItem().toString();
             ReservationGUI resGUI = new ReservationGUI(child_number, adult_number, selected_room_id, selected_hostel_type, total_night, check_in, check_out);
             resGUI.addWindowListener(new WindowAdapter() {
                 @Override
                 public void windowClosed(WindowEvent e) {
                     loadReservationModel();
                     loadRoomModel();
-                    fld_res_selected_id.setText(null);
                 }
             });
         });
@@ -646,7 +646,36 @@ public class AgencyGUI extends JFrame{
         tbl_reservation_list.getTableHeader().setReorderingAllowed(false); // Tablo başlıklarının düzenlenmesini engeller
         tbl_reservation_list.getColumnModel().getColumn(0).setMaxWidth(45);
         loadReservationModel();
+
+        tbl_reservation_list.getSelectionModel().addListSelectionListener(e -> {
+            try {
+                String select_res_id = tbl_reservation_list.getValueAt(tbl_reservation_list.getSelectedRow(), 0).toString();
+                fld_reservation_id.setText(select_res_id);
+            } catch (Exception ignored){
+            }
+        });
+
+        btn_delete_reservation.addActionListener(e -> {
+            if(Helper.isFieldEmpty(fld_reservation_id)) {
+                Helper.showMsg("fill");
+            } else {
+                if (Helper.confirm("sure")) {
+                    int reservation_id = Integer.parseInt(fld_reservation_id.getText());
+                    Room.increaseStock(Room.getFetchByRoomId(Reservation.getFetch(reservation_id).getRoom_id()).getStock(),
+                            Reservation.getFetch(Integer.parseInt(fld_reservation_id.getText())).getRoom_id());
+                    if(Reservation.delete(reservation_id)) {
+                        Helper.showMsg("done");
+                        loadReservationModel();
+                        loadRoomModel();
+                        fld_reservation_id.setText(null);
+                    } else {
+                        Helper.showMsg("error");
+                    }
+                }
+            }
+        });
         // ## Reservation List and Operations
+
     }
 
     private void loadReservationModel() {
@@ -789,10 +818,10 @@ public class AgencyGUI extends JFrame{
         }
     }
 
-    public void loadHostelTypeCombo(int hotel_id) {
+    public void loadHostelTypeCombo() {
         cmb_res_hostel_type.removeAllItems();
         for (Hostel obj : Hostel.getList()) {
-            if(hotel_id == obj.getHotel_id()) {
+            if(obj.getHotel_id() == Room.getFetchByRoomId(Integer.parseInt(fld_res_selected_id.getText())).getHotel_id()) {
                 cmb_res_hostel_type.addItem(new Item(obj.getId(), obj.getHostel()));
             }
         }
