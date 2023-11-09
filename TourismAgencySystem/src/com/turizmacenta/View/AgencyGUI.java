@@ -301,9 +301,11 @@ public class AgencyGUI extends JFrame{
             } else {
                 if (Helper.confirm("sure")) {
                     int period_id = Integer.parseInt(fld_period_id.getText());
-                    if(Period.delete(period_id)) {
+                    if(Period.delete(period_id) && Room.deletePeriod(period_id) && Price.deletePeriod(period_id)) {
                         Helper.showMsg("done");
                         loadPeriodModel();
+                        loadRoomModel();
+                        loadPriceModel();
                         fld_period_id.setText(null);
                     } else {
                         Helper.showMsg("error");

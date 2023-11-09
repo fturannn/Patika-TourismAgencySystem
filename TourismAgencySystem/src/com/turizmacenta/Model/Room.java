@@ -264,4 +264,15 @@ public class Room {
             throw new RuntimeException(e);
         }
     }
+
+    public static boolean deletePeriod(int period_id) {
+        String query = "DELETE FROM room WHERE period_id = ?";
+        try {
+            PreparedStatement pr = DBConnector.getInstance().prepareStatement(query);
+            pr.setInt(1,period_id);
+            return pr.executeUpdate() != -1;
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+    }
 }
