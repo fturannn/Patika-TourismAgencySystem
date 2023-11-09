@@ -102,9 +102,13 @@ public class ReservationGUI extends JFrame {
             }
         }
 
+        // Kriter 15: Misafir bilgisi, kalınacak gece sayısı ve pansiyon tipine göre konaklamaya ait fiyat başarılı
+        // bir şekilde hesaplanır
         int total_price = Integer.parseInt(total_night) * (adult_price * adult_number + child_price * child_number);
         fld_price.setText(String.valueOf(total_price));
 
+        // Kriter 16: Acenta çalışanı müşterinin talebine uygun odayı müşteri bilgilerini girerek başarılı
+        // şekilde rezervasyon yapabilir
         btn_reservation.addActionListener(e -> {
             String res_period = fld_period.getText();
             String hotel = fld_hotel.getText();
@@ -120,6 +124,8 @@ public class ReservationGUI extends JFrame {
                 Helper.showMsg("fill");
             } else {
                 if(Reservation.add(selected_room_id, res_period, hotel, hostel, night, person, name, tc, telephone, email, total)) {
+
+                    // Kriter 17: Rezervasyon yapılan odanın stoğu azalır
                     Room.updateStock(room_stock-1, selected_room_id);
                     Helper.showMsg("done");
                     dispose();

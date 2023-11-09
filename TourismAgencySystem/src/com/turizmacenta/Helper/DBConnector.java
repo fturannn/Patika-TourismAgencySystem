@@ -6,6 +6,7 @@ import java.sql.SQLException;
 public class DBConnector {
     private Connection connect = null;
 
+    // Kriter 6: DB Bağlantı konfigürasyonu
     public Connection connectDB() {
         try {
             this.connect = DriverManager.getConnection(Config.DB_URL, Config.DB_USERNAME, Config.DB_PASSWORD);

@@ -24,6 +24,7 @@ public class LoginGUI extends JFrame{
         setResizable(false);
         setVisible(true);
 
+        // Kriter 8: Login işleminde kullanıcının kaydının olup olmadığının kontrolü
         btn_login.addActionListener(e -> {
             if (Helper.isFieldEmpty(fld_user_uname) || Helper.isFieldEmpty(fld_user_pass)) {
                 Helper.showMsg("fill");

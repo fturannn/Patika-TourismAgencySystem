@@ -228,6 +228,7 @@ public class AgencyGUI extends JFrame{
             }
         });
 
+        // Kriter 9: Acente çalışanı anlaşmalı olduğu otelleri sisteme hotel adı, adres, E-posta, telefon, yıldız, tesis özellikleri, pansiyon tipleri bilgilerini girerek kaydeder
         btn_feature_hostel.addActionListener(e -> {
             String hotelStar = cmb_hotel_star.getSelectedItem().toString();
             String hotelName = cmb_hotel_city.getSelectedItem().toString();
@@ -314,6 +315,7 @@ public class AgencyGUI extends JFrame{
             }
         });
 
+        // Kriter 10: Otellerin sisteme eklenmesinde dönem yönetimi yapılması
         btn_add_period.addActionListener(e -> {
             Item hotelItem = (Item) cmb_hotel.getSelectedItem();
             if(Helper.isFieldEmpty(fld_period_start) || Helper.isFieldEmpty(fld_period_end)) {
@@ -420,6 +422,8 @@ public class AgencyGUI extends JFrame{
             }
         });
 
+        // Kriter 11: Acenta çalışanı sisteme kayıtlı otellere oda ekleyebilir. Oda eklerken oda tipi, oda özellikleri,
+        // ve stok miktarı girişi yapılır.
         btn_add_room.addActionListener(e -> {
             Item hotelItem = (Item) cmb_room_hotel_name.getSelectedItem();
             Item periodItem = (Item) cmb_room_period.getSelectedItem();
@@ -471,6 +475,8 @@ public class AgencyGUI extends JFrame{
             loadPriceRoomCombo();
         });
 
+        // Kriter 12: Sisteme yeni eklenen odaların fiyatları, sezon, pansiyon tipi ve konaklayanların yetişkin/çocuk
+        // olma durumuna göre belirlenir
         btn_price_add.addActionListener(e -> {
             Item hotelItem = (Item) cmb_price_hotel_name.getSelectedItem();
             Item periodItem = (Item) cmb_price_period.getSelectedItem();
@@ -574,6 +580,8 @@ public class AgencyGUI extends JFrame{
             }
         });
 
+        // Kriter 13: Acente çalışanı, tarih aralığına ve şehire göre odaları başarılı
+        // bir şekilde arayabilir
         btn_search_hotel.addActionListener(e -> {
             SimpleDateFormat formatter = new SimpleDateFormat("dd/MM/yyyy");
             String city = cmb_search_city.getSelectedItem().toString();
@@ -596,6 +604,10 @@ public class AgencyGUI extends JFrame{
             long diffInMillies = Math.abs(secondDate.getTime() - firstDate.getTime());
             String diff = String.valueOf(TimeUnit.DAYS.convert(diffInMillies, TimeUnit.MILLISECONDS));
             fld_res_night.setText(diff);
+
+            // Kriter 14: Arama sonucuna uygun otellerin bilgileri (adres, yıldız, otel imkanları vb) ve
+            // odaların bilgileri (giriş, çıkış tarihi, yetişkin, çocuk sayısı, yatak sayısı, minibar, TV vb)
+            // kullanıcıya gösterilir
             loadSearchModel(Room.getRoomList(city, check_in, check_out));
         });
 
@@ -616,6 +628,16 @@ public class AgencyGUI extends JFrame{
             String total_night = fld_res_night.getText();
             String check_in = fld_search_check_in.getText().trim();
             String check_out = fld_search_check_out.getText().trim();
+
+
+            // Aşağıdaki kriterler ReservationGUI içerisinde gerçekleştirilir
+            // Kriter 15: Misafir bilgisi, kalınacak gece sayısı ve pansiyon tipine göre konaklamaya ait fiyat başarılı
+            // bir şekilde hesaplanır
+
+            // Kriter 16: Acenta çalışanı müşterinin talebine uygun odayı müşteri bilgilerini girerek başarılı şekilde
+            // rezervasyon yapabilir
+
+            // Kriter 17: Rezervasyon yapılan odanın stoğu azalır
             ReservationGUI resGUI = new ReservationGUI(child_number, adult_number, selected_room_id, selected_hostel_type, total_night, check_in, check_out);
             resGUI.addWindowListener(new WindowAdapter() {
                 @Override
@@ -647,6 +669,8 @@ public class AgencyGUI extends JFrame{
         tbl_reservation_list.setModel(mdl_reservation_list);
         tbl_reservation_list.getTableHeader().setReorderingAllowed(false); // Tablo başlıklarının düzenlenmesini engeller
         tbl_reservation_list.getColumnModel().getColumn(0).setMaxWidth(45);
+
+        // Kriter 18: Acente çalışanları, sistem üzerinden yapılan rezervasyonları başarılı bir şekilde listeleyebilir
         loadReservationModel();
 
         tbl_reservation_list.getSelectionModel().addListSelectionListener(e -> {
@@ -657,6 +681,8 @@ public class AgencyGUI extends JFrame{
             }
         });
 
+        // Kriter 18: Acente çalışanları, sistem üzerinden yapılan rezervasyonları silebilir. Rezervasyon silindiğinde
+        // ilgili odanın stoğu yeniden 1 artar
         btn_delete_reservation.addActionListener(e -> {
             if(Helper.isFieldEmpty(fld_reservation_id)) {
                 Helper.showMsg("fill");
