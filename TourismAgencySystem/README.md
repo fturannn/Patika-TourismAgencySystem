@@ -32,11 +32,11 @@ Hotel Concierge
 SPA
 24/7 Room Service
 
-![img_2.png](img_2.png)
+![img_2.png](ScreenShots/img_2.png)
 
 ##### Example Hotel Screen:
 
-![img.png](img.png)
+![img.png](ScreenShots/img.png)
 
 
 #### Period Management
@@ -45,7 +45,7 @@ Historical periods for hotels are added, and pricing is done based on these peri
 
 ##### Example Period Screen:
 
-![img_3.png](img_3.png)
+![img_3.png](ScreenShots/img_3.png)
 
 #### Room Management
 
@@ -55,7 +55,7 @@ The agency adds the reserved rooms from hotels to the system and provides pricin
 
 ##### Example Room Screen:
 
-![img_4.png](img_4.png)
+![img_4.png](ScreenShots/img_4.png)
 
 #### Pricing
 
@@ -65,7 +65,7 @@ Room prices are calculated on a nightly basis. Prices are defined based on the p
 
 Prices are defined based on the nightly rates of rooms, including the agency's commission.
 
-![img_5.png](img_5.png)
+![img_5.png](ScreenShots/img_5.png)
 
 #### Room Search and Reservation Operations
 
@@ -87,7 +87,7 @@ The stock quantity of the room should be greater than 0.
 
 ##### Example Search Screen:
 
-![img_7.png](img_7.png)
+![img_7.png](ScreenShots/img_7.png)
 
 #### Price Calculation
 
@@ -101,7 +101,7 @@ Finding rooms with available stock in the identified hotel.
 
 If there is period price information for the rooms in the specified date range, price calculation is performed.
 
-![img_8.png](img_8.png)
+![img_8.png](ScreenShots/img_8.png)
 
 #### Reservation Process
 
@@ -117,7 +117,7 @@ The sale is completed through the system. If the sale is completed, the stock of
 
 Agency employees can list the reservations made in the system.
 
-![img_9.png](img_9.png)
+![img_9.png](ScreenShots/img_9.png)
 
 #### User Permissions
 
@@ -127,4 +127,4 @@ Tourism Agency Employee: Hotel Management, Room Management, Period Management, P
 
 #### Example Admin Screen:
 
-![img_10.png](img_10.png)
+![img_10.png](ScreenShots/img_10.png)
